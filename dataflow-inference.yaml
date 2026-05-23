@@ -1,0 +1,68 @@
+nodes:
+  # --- observer: collects arms + cameras into one Arrow IPC bundle ---
+  - id: observer
+    path: dora-openarm-observer
+    inputs:
+      tick:               quittable-tick-observer/tick   # 30 Hz gate
+      arm_right:          arm-right/position
+      arm_left:           arm-left/position
+      camera_wrist_right: camera-wrist-right/image
+      camera_wrist_left:  camera-wrist-left/image
+      camera_head:        camera-head/image
+      camera_ceiling:     camera-ceiling/image
+      phase_classifier_result: phase-classifier/result
+    outputs:
+      - observation   # Arrow IPC file path + metadata, written to /dev/shm
+
+  # --- quittable-observer: gate controlled by controller ---
+  - id: quittable-observer
+    path: dora-openarm-quitter
+    inputs:
+      command:     controller/command
+      observation: observer/observation
+    outputs:
+      - observation
+
+  # --- policy-server: YOUR node ---
+  - id: policy-server
+    path: dora-openarm-local-policy-server
+    env:
+      SOCKET: /dev/shm/policy-server.socket   # must match your running server
+    inputs:
+      observation: quittable-observer/observation
+    outputs:
+      - actions   # JSON: {interval, cutoff_hz, positions: [[16D], ...]}
+
+  # --- actions-executor: unpacks the chunk and drives the arms ---
+  - id: actions-executor
+    path: dora-openarm-actions-executor
+    args: "--upsample-on --filter-on"
+    inputs:
+      actions: policy-server/actions
+    outputs:
+      - move_position_right   # → arm-right
+      - move_position_left    # → arm-left
+
+  # ── MuJoCo viewer (replaces follower-right, follower-left, and all cameras) ──
+  - id: mujoco-collect
+    build: pip install -e nodes/dora-openarm-mujoco
+    path: dora-openarm-mujoco
+    args: "--scene demo --keyframe home --enable-collision --ctrl --viewer --render"
+    env:
+      DISPLAY: ":1" # needed when running headless with Xvfb
+    inputs:
+      position_left: ik/position_left
+      position_right: ik/position_right
+      pose_right: udp-receiver/pose_right
+      pose_left: udp-receiver/pose_left
+      joystick_y: udp-receiver/joystick_y
+    outputs:
+      - status
+      - arm_right_observation
+      - arm_left_observation
+      - camera_wrist_right
+      - camera_wrist_left
+      - camera_head_left
+      - camera_head_right
+      - camera_ceiling
+

@@ -11,7 +11,22 @@ This system runs inference on an [OpenArm](https://openarm.dev/) bimanual robot 
 * Dataset : https://huggingface.co/datasets/k1000dai/openarm_mujoco_pick_cube_3_cam
 * Model : https://huggingface.co/k1000dai/act_openarm_pick_cube_40k
 
-### Key Components
+## Model Training 
+
+install lerobot==0.3.3 and run the following command to train the ACT policy on the dataset. The trained model will be saved to `outputs/train` and can be optionally pushed to Hugging Face Hub.
+
+```python
+lerobot-train \
+  --dataset.repo_id=k1000dai/openarm_mujoco_pick_cube_3_cam \
+  --policy.type=act \
+  --output_dir=outputs/train \
+  --policy.device=cuda \
+  --wandb.enable=false \
+  --policy.repo_id=k1000dai/act_policy \
+  --policy.push_to_hub False
+```
+
+## Key Components
 
 | Component | Description |
 |---|---|
@@ -21,11 +36,6 @@ This system runs inference on an [OpenArm](https://openarm.dev/) bimanual robot 
 | **dora-openarm-actions-executor** | Upsamples action chunks (Hermite spline) and applies low-pass filter (biquad Butterworth, 15 Hz cutoff) |
 | **dora-openarm-mujoco** | MuJoCo physics simulation for the OpenArm robot |
 
-### Rate Control
-
-- **30 Hz** observation sampling
-- **250 Hz** motor control output
-- Action chunks are upsampled with cubic Hermite spline interpolation and smoothed with a second-order Butterworth low-pass filter
 
 ## Prerequisites
 

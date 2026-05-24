@@ -1,3 +1,4 @@
+from attr.validators import ge
 import json
 import os
 import socket
@@ -9,7 +10,7 @@ import torch
 from PIL import Image
 
 from lerobot.policies.pretrained import PreTrainedConfig
-from lerobot.policies.factory import make_policy
+from lerobot.policies.factory import get_policy_class
 
 PRETRAINED_PATH = "k1000dai/act_openarm_pick_cube_40k"
 DEFAULT_SOCKET = "/dev/shm/policy-server.socket"
@@ -97,7 +98,10 @@ def main():
     print(f"Loading policy from {PRETRAINED_PATH} on {device}...")
     policy_config = PreTrainedConfig.from_pretrained(PRETRAINED_PATH)
     policy_config.pretrained_path = PRETRAINED_PATH
-    policy = make_policy(policy_config)
+    kwargs = {}
+    kwargs["config"] = policy_config
+    kwargs["pretrained_name_or_path"] = policy_config.pretrained_path
+    policy = get_policy_class(policy_config.type).from_pretrained(**kwargs)
 
     if device != policy.config.device:
         policy.to(device)

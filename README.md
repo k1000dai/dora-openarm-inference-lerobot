@@ -53,7 +53,8 @@ deactivate
 uv venv .venv_server 
 source .venv_server/bin/activate
 uv pip install lerobot==0.3.3 pyarrow Pillow
-uv pip install torch torchvision --torch-backend auto --upgrade
+# NVIDIA / CUDA 12.8 系を使いたい場合
+uv pip install torch torchvision torchaudio --torch-backend=cu128 --upgrade
 deactivate
 ```
 

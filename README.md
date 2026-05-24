@@ -4,24 +4,10 @@ Real-time bimanual robot control using a pre-trained ACT (Action Chunking with T
 
 ## Overview
 
-This system runs inference on an [OpenArm](https://github.com/openarm-org) bimanual robot (dual 7-DOF arms + grippers) using a transformer-based policy trained with LeRobot. The pipeline accepts camera observations and arm state, infers action chunks, and executes them on the robot or its MuJoCo simulation.
+This system runs inference on an [OpenArm](https://openarm.dev/) bimanual robot (dual 7-DOF arms + grippers) using a transformer-based policy trained with LeRobot. The pipeline accepts camera observations and arm state, infers action chunks, and executes them on the robot or its MuJoCo simulation.
 
-## Architecture
+## Dataset and model
 
-The system is built as a dora-rs dataflow graph defined in `dataflow-inference.yaml`:
-
-```
-mujoco (simulator)
-  ├── arm observations (right/left)
-  ├── 5 camera streams (JPEG)
-  │
-  ├──► observer (batches observations → Arrow IPC)
-  │     └──► policy-server (ACT model inference via Unix socket)
-  │           └──► actions-executor (upsample + filter → 250 Hz motor commands)
-  │                 └──► mujoco (closes the loop)
-  │
-  └── tick (250 Hz → 30 Hz gating)
-```
 
 ### Key Components
 
@@ -47,10 +33,10 @@ mujoco (simulator)
 
 Two separate virtual environments are used due to CUDA version requirements:
 
-| Environment | Purpose | CUDA |
-|---|---|---|
-| `.venv` | dora dataflow orchestration | cu126 |
-| `.venv_server` | Policy inference server | cu130 |
+| Environment | Purpose |
+|---|---|
+| `.venv` | dora dataflow orchestration |
+| `.venv_server` | Policy inference server | 
 
 ## Setup
 
@@ -60,18 +46,33 @@ git clone --recursive https://github.com/k1000dai/dora-openarm-inference-lerobot
 cd dora-openarm-inference-lerobot
 
 # Install dependencies
-uv sync
+uv venv .venv
+source .venv/bin/activate
+uv pip install dora-rs-cli
+deactivate
+uv venv .venv_server 
+source .venv_server/bin/activate
+uv pip install lerobot==0.3.3 pyarrow Pillow
+uv pip install torch torchvision --torch-backend auto --upgrade
+deactivate
 ```
 
 ## Usage
 
+### policy inference server
 ```bash
-# Build and run the dataflow
-uv run dora build dataflow-inference.yaml --uv
-uv run dora run dataflow-inference.yaml
+source .venv_server/bin/activate
+python src/inference_server.py /dev/shm/policy-server.socket
 ```
 
 The inference server runs as a separate process, communicating via a Unix domain socket at `/dev/shm/policy-server.socket`.
+
+### dora dataflow
+```bash
+source .venv/bin/activate
+dora build dataflow-inference.yaml --uv
+SOCKET=/dev/shm/policy-server.socket dora run dataflow-inference.yaml --uv
+```
 
 ## Project Structure
 
@@ -88,11 +89,3 @@ The inference server runs as a separate process, communicating via a Unix domain
 ├── pyproject.toml
 └── main.py
 ```
-
-## Dependencies
-
-- **dora-rs** >= 0.5.0 - Dataflow orchestration
-- **lerobot** == 0.3.3 - Pre-trained ACT policy
-- **pyarrow** >= 15.0.0 - Arrow IPC serialization
-- **Pillow** >= 10.0.0 - Image processing
-- **mujoco** >= 3.6.0 - Physics simulation (in mujoco node)

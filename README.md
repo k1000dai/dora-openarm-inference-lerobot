@@ -8,6 +8,8 @@ This system runs inference on an [OpenArm](https://openarm.dev/) bimanual robot 
 
 ## Dataset and model
 
+* Dataset : https://huggingface.co/datasets/k1000dai/openarm_mujoco_pick_cube_3_cam
+* Model : https://huggingface.co/k1000dai/act_openarm_pick_cube_40k
 
 ### Key Components
 

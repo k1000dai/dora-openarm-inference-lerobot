@@ -8,7 +8,7 @@ import pyarrow as pa
 import torch
 from PIL import Image
 
-from lerobot.policies.act.modeling_act import ACTPolicy
+from lerobot.policies.pretrained import PreTrainedPolicy
 
 PRETRAINED_PATH = "k1000dai/act_openarm_pick_cube_40k"
 DEFAULT_SOCKET = "/dev/shm/policy-server.socket"
@@ -67,7 +67,7 @@ def observation_to_batch(observation, device):
         target_h, target_w = IMAGE_SIZES[model_key]
         img = prepare_image(observation[arrow_key], target_h, target_w)
 
-        print(img.shape, img.dtype, img.is_contiguous(), img.stride())
+        # print(img.shape, img.dtype, img.is_contiguous(), img.stride()) for debugging
         batch[model_key] = img.unsqueeze(0).to(device)
 
     return batch
@@ -94,7 +94,7 @@ def main():
         device = "cpu"
 
     print(f"Loading policy from {PRETRAINED_PATH} on {device}...")
-    policy = ACTPolicy.from_pretrained(PRETRAINED_PATH)
+    policy = PreTrainedPolicy.from_pretrained(PRETRAINED_PATH)
     if device != policy.config.device:
         policy.to(device)
     policy.reset()

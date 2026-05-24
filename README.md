@@ -31,38 +31,38 @@ lerobot-train \
 ```mermaid
 flowchart TB
   subgraph venv [".venv — dora dataflow"]
-    subgraph dora_timer [dora timer]
-      timer[\millis/4 · 250Hz/]
+    subgraph dora_timer ["dora timer"]
+      timer(["millis/4 · 250Hz"])
     end
 
-    tick_gate["quittable-tick-observer<br/><sub>gate</sub>"]
-    obs_gate["quittable-observer<br/><sub>gate</sub>"]
+    tick_gate["quittable-tick-observer<br>(gate)"]
+    obs_gate["quittable-observer<br>(gate)"]
 
-    observer["**observer**<br/><sub>JPEG→RGB · concat arms · Arrow StructArray</sub>"]
-    policy["**policy-server**<br/><sub>Arrow IPC on /dev/shm · JSON via socket</sub>"]
-    executor["**actions-executor**<br/><sub>Hermite upsample 30→250 Hz · Biquad LPF 15 Hz</sub>"]
-    mujoco["**mujoco-collect**<br/><sub>MuJoCo physics · offscreen camera 30 Hz</sub>"]
+    observer["observer<br>JPEG→RGB · concat arms · Arrow StructArray"]
+    policy["policy-server<br>Arrow IPC on /dev/shm · JSON via socket"]
+    executor["actions-executor<br>Hermite upsample 30→250 Hz · Biquad LPF 15 Hz"]
+    mujoco["mujoco-collect<br>MuJoCo physics · offscreen camera 30 Hz"]
   end
 
   subgraph venv_server [".venv_server — inference server"]
-    inference["**inference_server**<br/><sub>ACT Policy · LeRobot · PyTorch · GPU</sub>"]
+    inference["inference_server<br>ACT Policy · LeRobot · PyTorch · GPU"]
   end
 
   timer -- tick --> tick_gate -- tick --> observer
 
-  mujoco -- "arm_{right,left}<br/><sub>float32[8]</sub>" --> observer
-  mujoco -- "camera × 5<br/><sub>JPEG uint8[]</sub>" --> observer
+  mujoco -- "arm_right, arm_left<br>float32[8]" --> observer
+  mujoco -- "camera x 5<br>JPEG uint8[]" --> observer
 
-  observer -- "observation<br/><sub>Arrow StructArray (16D + RGB)</sub>" --> obs_gate
+  observer -- "observation<br>Arrow StructArray (16D + RGB)" --> obs_gate
   obs_gate -- observation --> policy
 
-  policy -. "Arrow IPC + JSON req<br/><sub>Unix Socket · /dev/shm/policy-server.socket</sub>" .-> inference
-  inference -. "JSON res<br/><sub>{positions: N × 16D}</sub>" .-> policy
+  policy -. "Arrow IPC + JSON req<br>Unix Socket" .-> inference
+  inference -. "JSON res<br>positions: N x 16D" .-> policy
 
-  policy -- "actions<br/><sub>list‹float32› N × 16D</sub>" --> executor
+  policy -- "actions<br>list(float32) N x 16D" --> executor
 
-  executor -- "position_right<br/><sub>float32[8] @ 250 Hz</sub>" --> mujoco
-  executor -- "position_left<br/><sub>float32[8] @ 250 Hz</sub>" --> mujoco
+  executor -- "position_right<br>float32[8] @ 250 Hz" --> mujoco
+  executor -- "position_left<br>float32[8] @ 250 Hz" --> mujoco
 ```
 
 | Segment | Rate | Note |

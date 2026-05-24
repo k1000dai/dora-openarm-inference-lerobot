@@ -8,7 +8,8 @@ import pyarrow as pa
 import torch
 from PIL import Image
 
-from lerobot.policies.pretrained import PreTrainedPolicy
+from lerobot.policies.pretrained import PreTrainedConfig
+from lerobot.policies.factory import make_policy
 
 PRETRAINED_PATH = "k1000dai/act_openarm_pick_cube_40k"
 DEFAULT_SOCKET = "/dev/shm/policy-server.socket"
@@ -94,7 +95,10 @@ def main():
         device = "cpu"
 
     print(f"Loading policy from {PRETRAINED_PATH} on {device}...")
-    policy = PreTrainedPolicy.from_pretrained(PRETRAINED_PATH)
+    policy_config = PreTrainedConfig.from_pretrained(PRETRAINED_PATH)
+    policy_config.pretrained_path = PRETRAINED_PATH
+    policy = make_policy(policy_config)
+
     if device != policy.config.device:
         policy.to(device)
     policy.reset()

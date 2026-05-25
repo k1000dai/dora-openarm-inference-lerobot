@@ -1,7 +1,7 @@
 nodes:
   # --- observer: collects arms + cameras into one Arrow IPC bundle ---
   - id: observer
-    build: pip install -e nodes/dora-openarm-observer
+    build: pip install dora-openarm-observer
     path: dora-openarm-observer
     inputs:
       tick:               quittable-tick-observer/tick   # 30 Hz gate
@@ -37,7 +37,7 @@ nodes:
 
   # --- policy-server: YOUR node ---
   - id: policy-server
-    build: pip install -e nodes/dora-openarm-local-policy-server
+    build: pip install dora-openarm-local-policy-server
     path: dora-openarm-local-policy-server
     env:
       SOCKET: /dev/shm/policy-server.socket   # must match your running server
@@ -48,7 +48,7 @@ nodes:
 
   # --- actions-executor: unpacks the chunk and drives the arms ---
   - id: actions-executor
-    build: pip install -e nodes/dora-openarm-actions-executor
+    build: pip install dora-openarm-actions-executor
     path: dora-openarm-actions-executor
     args: "--upsample --filter"
     inputs:

@@ -3,7 +3,7 @@
 	url = git@github.com:enactic/dora-openarm-local-policy-server.git
 [submodule "nodes/dora-openarm-mujoco"]
 	path = nodes/dora-openarm-mujoco
-	url = git@github.com:k1000dai/dora-openarm-mujoco.git
+	url = git@github.com:enactic/dora-openarm-mujoco.git
 [submodule "nodes/dora-openarm-quitter"]
 	path = nodes/dora-openarm-quitter
 	url = git@github.com:enactic/dora-openarm-quitter.git

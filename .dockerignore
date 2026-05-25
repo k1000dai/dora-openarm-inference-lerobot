@@ -1,0 +1,7 @@
+.git
+.venv
+out/
+nodes/
+uv.lock
+__pycache__
+*.pyc

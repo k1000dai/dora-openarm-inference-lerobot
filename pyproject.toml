@@ -10,3 +10,9 @@ dependencies = [
     "pyarrow>=15.0.0",
     "Pillow>=10.0.0",
 ]
+
+[tool.setuptools.packages.find]
+include = ["src*"]
+
+[project.scripts]
+dora-openarm-inference-lerobot = "src.docker_inference_server:main"

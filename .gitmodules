@@ -1,15 +1,6 @@
-[submodule "nodes/dora-openarm-local-policy-server"]
-	path = nodes/dora-openarm-local-policy-server
-	url = git@github.com:enactic/dora-openarm-local-policy-server.git
 [submodule "nodes/dora-openarm-mujoco"]
 	path = nodes/dora-openarm-mujoco
 	url = git@github.com:enactic/dora-openarm-mujoco.git
 [submodule "nodes/dora-openarm-quitter"]
 	path = nodes/dora-openarm-quitter
 	url = git@github.com:enactic/dora-openarm-quitter.git
-[submodule "nodes/dora-openarm-actions-executor"]
-	path = nodes/dora-openarm-actions-executor
-	url = git@github.com:enactic/dora-openarm-actions-executor.git
-[submodule "nodes/dora-openarm-observer"]
-	path = nodes/dora-openarm-observer
-	url = git@github.com:enactic/dora-openarm-observer.git

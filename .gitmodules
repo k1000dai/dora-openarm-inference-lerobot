@@ -9,7 +9,7 @@
 	url = git@github.com:enactic/dora-openarm-quitter.git
 [submodule "nodes/dora-openarm-actions-executor"]
 	path = nodes/dora-openarm-actions-executor
-	url = git@github.com:k1000dai/dora-openarm-actions-executor.git
+	url = git@github.com:enactic/dora-openarm-actions-executor.git
 [submodule "nodes/dora-openarm-observer"]
 	path = nodes/dora-openarm-observer
 	url = git@github.com:enactic/dora-openarm-observer.git

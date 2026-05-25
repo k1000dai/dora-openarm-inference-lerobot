@@ -4,3 +4,6 @@
 [submodule "nodes/dora-openarm-quitter"]
 	path = nodes/dora-openarm-quitter
 	url = git@github.com:enactic/dora-openarm-quitter.git
+[submodule "nodes/dora-openarm-observer"]
+	path = nodes/dora-openarm-observer
+	url = git@github.com:enactic/dora-openarm-observer.git

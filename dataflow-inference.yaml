@@ -1,7 +1,7 @@
 nodes:
   # --- observer: collects arms + cameras into one Arrow IPC bundle ---
   - id: observer
-    build: pip install dora-openarm-observer
+    build: pip install -e  nodes/dora-openarm-observer
     path: dora-openarm-observer
     inputs:
       tick:               quittable-tick-observer/tick   # 30 Hz gate

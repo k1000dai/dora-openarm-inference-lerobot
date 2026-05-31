@@ -1,0 +1,170 @@
+nodes:
+  # --- observer: collects arms + cameras into one Arrow IPC bundle ---
+  - id: observer
+    build: pip install -e  nodes/dora-openarm-observer
+    path: dora-openarm-observer
+    inputs:
+      tick: quittable-tick-observer/tick # 30 Hz gate
+      arm_right: follower-right/state
+      arm_left: follower-left/state
+      camera_wrist_right: camera-wrist-right/image
+      camera_wrist_left: camera-wrist-left/image
+      camera_head_left: camera-head-stereo-splitter/image_0
+      camera_head_right: camera-head-stereo-splitter/image_1
+      camera_ceiling: camera-ceiling/image
+    outputs:
+      - observation # Arrow IPC file path + metadata, written to /dev/shm
+
+  - id: quittable-tick-camera
+    build: pip install -e nodes/dora-openarm-quitter
+    # build: pip install dora-openarm-quitter
+    path: dora-openarm-quitter
+    inputs:
+      command: ui/command
+      # tick: dora/timer/millis/200 # 5Hz
+      tick: dora/timer/millis/33 # 30fps
+    outputs:
+      - tick
+
+  - id: quittable-tick-observer
+    build: pip install -e nodes/dora-openarm-quitter
+    # build: pip install dora-openarm-quitter
+    path: dora-openarm-quitter
+    inputs:
+      # 250Hz
+      tick: dora/timer/millis/4
+    outputs:
+      - tick
+
+  # --- quittable-observer: gate controlled by controller ---
+  - id: quittable-observer
+    build: pip install -e nodes/dora-openarm-quitter
+    path: dora-openarm-quitter
+    inputs:
+      observation: observer/observation
+    outputs:
+      - observation
+
+  # --- policy-server: YOUR node ---
+  - id: policy-server
+    build: pip install dora-openarm-local-policy-server
+    path: dora-openarm-local-policy-server
+    env:
+      SOCKET: /dev/shm/policy-server.socket # must match your running server
+    inputs:
+      observation: quittable-observer/observation
+    outputs:
+      - actions # JSON: {interval, cutoff_hz, positions: [[16D], ...]}
+
+  # --- actions-executor: unpacks the chunk and drives the arms ---
+  - id: actions-executor
+    build: pip install dora-openarm-actions-executor
+    path: dora-openarm-actions-executor
+    args: "--upsample --filter"
+    inputs:
+      actions: policy-server/actions
+    outputs:
+      - move_position_right # → arm-right
+      - move_position_left # → arm-left
+
+  - id: follower-right
+    build: pip install -e nodes/dora-openarm
+    # build: pip install dora-openarm
+    path: dora-openarm
+    args: "--side right --align-trigger gripper"
+    inputs:
+      # Event ID is only used. Event value isn't used.
+      request_state: actions-executor/move_position_right
+      move_position: actions-executor/move_position_right
+    outputs:
+      - state
+      - status
+
+  - id: follower-left
+    build: pip install -e nodes/dora-openarm
+    # build: pip install dora-openarm
+    path: dora-openarm
+    args: "--side left --align-trigger gripper"
+    inputs:
+      # Event ID is only used. Event value isn't used.
+      request_state: actions-executor/move_position_left
+      move_position: actions-executor/move_position_left
+    outputs:
+      - state
+      - status
+
+  - id: camera-wrist-right
+    build: pip install opencv-video-capture
+    path: opencv-video-capture
+    env:
+      # Please configure!
+      CAPTURE_PATH: "/dev/camera_wrist_right"
+      ENCODING: "jpeg"
+      IMAGE_HEIGHT: 600
+      IMAGE_WIDTH: 960
+      JPEG_QUALITY: 90
+    inputs:
+      tick: quittable-tick-camera/tick
+    outputs:
+      - image
+
+  - id: camera-wrist-left
+    build: pip install opencv-video-capture
+    path: opencv-video-capture
+    env:
+      # Please configure!
+      CAPTURE_PATH: "/dev/camera_wrist_left"
+      ENCODING: "jpeg"
+      IMAGE_HEIGHT: 600
+      IMAGE_WIDTH: 960
+      JPEG_QUALITY: 90
+    inputs:
+      tick: quittable-tick-camera/tick
+    outputs:
+      - image
+
+  - id: camera-head-stereo
+    build: pip install opencv-video-capture
+    path: opencv-video-capture
+    env:
+      # Please configure!
+      # Stereo camera: left and right images placed side by side in one frame.
+      CAPTURE_PATH: "/dev/camera_head_stereo"
+      ENCODING: "bgr8"
+      IMAGE_HEIGHT: 720
+      IMAGE_WIDTH: 2560
+    inputs:
+      tick: quittable-tick-camera/tick
+    outputs:
+      - image
+
+  - id: camera-head-stereo-splitter
+    build: pip install -e nodes/dora-opencv-image-splitter
+    # build: pip install dora-opencv-image-splitter
+    path: dora-opencv-image-splitter
+    env:
+      SPLIT_MODE: "vertical"
+      NUM_SPLITS: 2
+      JPEG_QUALITY: 90
+      IMAGE_HEIGHT: 720
+      IMAGE_WIDTH: 2560
+    inputs:
+      image: camera-head-stereo/image
+    outputs:
+      - image_0
+      - image_1
+
+  - id: camera-ceiling
+    build: pip install opencv-video-capture
+    path: opencv-video-capture
+    env:
+      # Please configure!
+      CAPTURE_PATH: "/dev/camera_ceiling"
+      ENCODING: "jpeg"
+      IMAGE_HEIGHT: 600
+      IMAGE_WIDTH: 960
+      JPEG_QUALITY: 90
+    inputs:
+      tick: quittable-tick-camera/tick
+    outputs:
+      - image

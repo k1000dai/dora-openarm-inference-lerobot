@@ -13,3 +13,6 @@
 [submodule "nodes/dora-openarm-image-splitter"]
 	path = nodes/dora-openarm-image-splitter
 	url = https://github.com/enactic/dora-opencv-image-splitter.git
+[submodule "nodes/dora-openarm-observer"]
+	path = nodes/dora-openarm-observer
+	url = git@github.com:enactic/dora-openarm-observer.git

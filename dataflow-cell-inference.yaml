@@ -5,8 +5,8 @@ nodes:
     path: dora-openarm-observer
     inputs:
       tick: quittable-tick-observer/tick # 30 Hz gate
-      arm_right: follower-right/state
-      arm_left: follower-left/state
+      arm_right: follower-right/position
+      arm_left: follower-left/position
       camera_wrist_right: camera-wrist-right/image
       camera_wrist_left: camera-wrist-left/image
       camera_head_left: camera-head-stereo-splitter/image_0
@@ -26,6 +26,18 @@ nodes:
       - tick
 
   - id: quittable-tick-observer
+    build: pip install -e nodes/dora-openarm-quitter
+    # build: pip install dora-openarm-quitter
+    path: dora-openarm-quitter
+    inputs:
+      # 250Hz
+      tick: dora/timer/millis/4
+    outputs:
+      - tick
+
+  # --- quittable-tick-arm: independent trigger so followers keep publishing
+  #     position regardless of the action loop (breaks the bootstrap deadlock) ---
+  - id: quittable-tick-arm
     build: pip install -e nodes/dora-openarm-quitter
     # build: pip install dora-openarm-quitter
     path: dora-openarm-quitter
@@ -70,26 +82,28 @@ nodes:
     build: pip install -e nodes/dora-openarm
     # build: pip install dora-openarm
     path: dora-openarm
-    args: "--side right --align-trigger gripper"
+    args: "--side right --align-threshold 0.2"
     inputs:
-      # Event ID is only used. Event value isn't used.
-      request_state: actions-executor/move_position_right
+      # request_position drives the periodic state publish (250Hz tick);
+      # move_position carries the policy's target.
+      request_position: quittable-tick-arm/tick
       move_position: actions-executor/move_position_right
     outputs:
-      - state
+      - position
       - status
 
   - id: follower-left
     build: pip install -e nodes/dora-openarm
     # build: pip install dora-openarm
     path: dora-openarm
-    args: "--side left --align-trigger gripper"
+    args: "--side left --align-threshold 0.2"
     inputs:
-      # Event ID is only used. Event value isn't used.
-      request_state: actions-executor/move_position_left
+      # request_position drives the periodic state publish (250Hz tick);
+      # move_position carries the policy's target.
+      request_position: quittable-tick-arm/tick
       move_position: actions-executor/move_position_left
     outputs:
-      - state
+      - position
       - status
 
   - id: camera-wrist-right

@@ -35,12 +35,12 @@ nodes:
     outputs:
       - observation
 
-  # --- policy-server: YOUR node ---
+  # --- policy-server: Docker based inference ---
   - id: policy-server
-    build: pip install dora-openarm-local-policy-server
-    path: dora-openarm-local-policy-server
+    build: pip install dora-openarm-docker-policy-server
+    path: dora-openarm-docker-policy-server
     env:
-      SOCKET: /dev/shm/policy-server.socket   # must match your running server
+      IMAGE: dora-openarm-inference-lerobot:latest
     inputs:
       observation: quittable-observer/observation
     outputs:

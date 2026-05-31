@@ -20,7 +20,6 @@ nodes:
     # build: pip install dora-openarm-quitter
     path: dora-openarm-quitter
     inputs:
-      command: ui/command
       # tick: dora/timer/millis/200 # 5Hz
       tick: dora/timer/millis/33 # 30fps
     outputs:

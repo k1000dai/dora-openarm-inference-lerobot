@@ -10,9 +10,9 @@
 [submodule "nodes/dora-openarm-cell-lifter"]
 	path = nodes/dora-openarm-cell-lifter
 	url = https://github.com/enactic/dora-openarm-cell-lifter.git
-[submodule "nodes/dora-openarm-image-splitter"]
-	path = nodes/dora-openarm-image-splitter
-	url = https://github.com/enactic/dora-opencv-image-splitter.git
 [submodule "nodes/dora-openarm-observer"]
 	path = nodes/dora-openarm-observer
 	url = https://github.com/enactic/dora-openarm-observer.git
+[submodule "nodes/dora-opencv-image-splitter"]
+	path = nodes/dora-opencv-image-splitter
+	url = https://github.com/enactic/dora-opencv-image-splitter.git

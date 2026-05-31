@@ -4,3 +4,12 @@
 [submodule "nodes/dora-openarm-quitter"]
 	path = nodes/dora-openarm-quitter
 	url = git@github.com:enactic/dora-openarm-quitter.git
+[submodule "nodes/dora-openarm"]
+	path = nodes/dora-openarm
+	url = git@github.com:enactic/dora-openarm.git
+[submodule "nodes/dora-openarm-cell-lifter"]
+	path = nodes/dora-openarm-cell-lifter
+	url = git@github.com:enactic/dora-openarm-cell-lifter.git
+[submodule "nodes/dora-openarm-image-splitter"]
+	path = nodes/dora-openarm-image-splitter
+	url = https://github.com/enactic/dora-opencv-image-splitter.git

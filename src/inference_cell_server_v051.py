@@ -44,7 +44,10 @@ PRETRAINED_PATH = os.environ.get("PRETRAINED_PATH", str(DEFAULT_MODEL_PATH))
 # Language instruction fed to pi05 on every step. This MUST match the task
 # string the model was trained on or the policy will misbehave. Set it via the
 # TASK env var, or replace the placeholder below.
-TASK = os.environ.get("TASK", "<SET ME>")
+TASK = os.environ.get("TASK", None)
+if TASK is None:
+    TASK = "<SET ME>"
+    print("WARNING: TASK is not set. Set the TASK env var to the instruction the model ")
 
 DEFAULT_SOCKET = "/dev/shm/policy-server.socket"
 

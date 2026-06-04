@@ -163,6 +163,12 @@ def main():
 
     print(f"Loading policy from {PRETRAINED_PATH} on {device}...")
     policy_config = PreTrainedConfig.from_pretrained(pretrained_name_or_path=PRETRAINED_PATH)
+    # This model was trained with compile_model=True baked into its config, so
+    # pi05's __init__ would torch.compile sample_actions/forward at load time
+    # (mode=max-autotune → a long startup warmup). Disable it for serving: we
+    # want fast, predictable startup over peak throughput.
+    if getattr(policy_config, "compile_model", False):
+        policy_config.compile_model = False
     policy = get_policy_class(policy_config.type).from_pretrained(
         PRETRAINED_PATH, config=policy_config
     )

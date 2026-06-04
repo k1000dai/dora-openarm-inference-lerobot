@@ -82,7 +82,7 @@ nodes:
     build: pip install -e nodes/dora-openarm
     # build: pip install dora-openarm
     path: dora-openarm
-    args: "--side right --align-threshold 0.2"
+    args: "--side right --align-threshold 0.2 --config ./openarm_cell_higher_pd.yaml"
     inputs:
       # request_position drives the periodic state publish (250Hz tick);
       # move_position carries the policy's target.
@@ -96,7 +96,7 @@ nodes:
     build: pip install -e nodes/dora-openarm
     # build: pip install dora-openarm
     path: dora-openarm
-    args: "--side left --align-threshold 0.2"
+    args: "--side left --align-threshold 0.2 --config ./openarm_cell_higher_pd.yaml"
     inputs:
       # request_position drives the periodic state publish (250Hz tick);
       # move_position carries the policy's target.
